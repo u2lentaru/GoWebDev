@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	//strings.Contains("test", "es")) https://gobyexample.ru/string-functions.html
+
 	/*resp, err := http.Get("https://golang.org")
 	if err != nil {
 		fmt.Println(err)

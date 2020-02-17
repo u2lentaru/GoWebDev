@@ -31,20 +31,23 @@ func main() {
 		}
 	}
 
+	fmt.Println("Pages contains '" + os.Args[1] + "':")
+
 	for _, resurl := range resultUrls {
 		fmt.Println(resurl)
 	}
 }
 
-//PS C:\Golang_work\src\GoWebDev> go run C:\Golang_work\src\GoWebDev\homework-1\homework-1.go нефть
-//https://tass.ru
-//200 OK
-//0
-//https://rbc.ru
-//200 OK
-//1
-//https://ria.ru
-//200 OK
-//2
-//https://rbc.ru
-//https://ria.ru
+// PS C:\Golang_work\src\GoWebDev> go run C:\Golang_work\src\GoWebDev\homework-1\homework-1.go нефть
+// https://tass.ru
+// 200 OK
+// 0
+// https://rbc.ru
+// 200 OK
+// 1
+// https://ria.ru
+// 200 OK
+// 2
+// Pages contains 'нефть':
+// https://rbc.ru
+// https://ria.ru

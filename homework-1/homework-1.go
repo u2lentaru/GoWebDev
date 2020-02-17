@@ -1,65 +1,50 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
-	"os/signal"
-
-	gowebsocket "github.com/sacOO7/GoWebsocket"
+	"strings"
 )
 
 func main() {
-	//strings.Contains("test", "es")) https://gobyexample.ru/string-functions.html
+	urls := []string{"https://tass.ru", "https://rbc.ru", "https://ria.ru"}
+	resultUrls := []string{}
 
-	/*resp, err := http.Get("https://golang.org")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	fmt.Println(resp.Status)
-	fmt.Println(resp.StatusCode)
-	fmt.Println(resp.Header)
-	io.Copy(os.Stdout, resp.Body)
-	*/
-
-	/*resp, err := http.Post(
-		"https://postman-echo.com/post",
-		"application/json",
-		strings.NewReader(`{"foo1":"bar1","foo2":"bar2"}`),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
-	*/
-
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-
-	socket := gowebsocket.New("ws://echo.websocket.org/")
-	socket.OnConnected = func(socket gowebsocket.Socket) {
-		log.Println("Соединение установлено")
-	}
-
-	socket.OnConnectError = func(err error, socket gowebsocket.Socket) {
-		log.Println("Соединение не установлено", err)
-	}
-
-	socket.OnPingReceived = func(data string, socket gowebsocket.Socket) {
-		log.Println("Получен пинг" + data)
-	}
-
-	socket.Connect()
-
-	for {
-		select {
-		case <-interrupt:
-			log.Println("Закрытие соединения с сервером")
-			socket.Close()
+	for _, url := range urls {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
 			return
 		}
+		fmt.Println(url)
+		fmt.Println(resp.Status)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(strings.Count(string(body), os.Args[1]))
+		if strings.Contains(string(body), os.Args[1]) {
+			resultUrls = append(resultUrls, url)
+		}
+	}
+
+	for _, resurl := range resultUrls {
+		fmt.Println(resurl)
 	}
 }
+
+//PS C:\Golang_work\src\GoWebDev> go run C:\Golang_work\src\GoWebDev\homework-1\homework-1.go нефть
+//https://tass.ru
+//200 OK
+//0
+//https://rbc.ru
+//200 OK
+//1
+//https://ria.ru
+//200 OK
+//2
+//https://rbc.ru
+//https://ria.ru

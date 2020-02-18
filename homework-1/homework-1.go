@@ -52,6 +52,7 @@ func strSearch(str string, urls []string) []string {
 	return resultUrls
 }
 
+//func getYandexFile(yaurl string)
 func getYandexFile(yaurl string) {
 	type tyad struct {
 		Href      string
@@ -59,7 +60,6 @@ func getYandexFile(yaurl string) {
 		Templated bool
 	}
 	var yad tyad
-
 	//!!!!!
 	//Lower case don't work!
 	// href      string

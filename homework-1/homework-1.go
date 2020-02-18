@@ -25,30 +25,30 @@ func main() {
 
 //func strSearch(str string, urls []string) []string
 func strSearch(str string, urls []string) []string {
-
-	resultUrls := []string{}
+	//resultUrls := []string{}
+	resultUrls := make([]string, 0)
 
 	for _, url := range urls {
 		resp, err := http.Get(url)
 		if err != nil {
 			fmt.Println(err)
-			return resultUrls
+			//return resultUrls
+			continue
 		}
 		defer resp.Body.Close()
-		fmt.Println(url)
-		fmt.Println(resp.Status)
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println(err)
 			return resultUrls
 		}
-		fmt.Println(strings.Count(string(body), str))
+		fmt.Printf("There %v string counts\n", strings.Count(string(body), str))
 		if strings.Contains(string(body), str) {
 			resultUrls = append(resultUrls, url)
 		}
 	}
-
-	fmt.Println("Pages contains '" + str + "':")
+	if len(resultUrls) > 0 {
+		fmt.Printf("Pages contains %v:\n", str)
+	}
 	return resultUrls
 }
 
@@ -106,7 +106,6 @@ func getYandexFile(yaurl string) {
 	}
 
 	fmt.Println("File yad.pdf successfully copied!")
-
 }
 
 // PS C:\Golang_work\src\GoWebDev> go run C:\Golang_work\src\GoWebDev\homework-1\homework-1.go нефть

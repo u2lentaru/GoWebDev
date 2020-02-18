@@ -23,6 +23,7 @@ func main() {
 
 }
 
+//func strSearch(str string, urls []string) []string
 func strSearch(str string, urls []string) []string {
 
 	resultUrls := []string{}
@@ -48,7 +49,6 @@ func strSearch(str string, urls []string) []string {
 	}
 
 	fmt.Println("Pages contains '" + str + "':")
-
 	return resultUrls
 }
 
@@ -58,14 +58,13 @@ func getYandexFile(yaurl string) {
 		Method    string
 		Templated bool
 	}
+	var yad tyad
 
 	//!!!!!
 	//Lower case don't work!
 	// href      string
 	// method    string
 	// templated bool
-
-	var yad tyad
 
 	resp, err := http.Get(yaurl)
 	if err != nil {

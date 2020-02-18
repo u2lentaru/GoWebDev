@@ -1,24 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
 func main() {
 
-	//urls := []string{"https://tass.ru", "https://rbc.ru", "https://ria.ru"}
+	urls := []string{"https://tass.ru", "https://rbc.ru", "https://ria.ru"}
 
-	// for _, resurl := range strSearch(os.Args[1], urls) {
-	// 	fmt.Println(resurl)
-	// }
+	for _, resurl := range strSearch(os.Args[1], urls) {
+		fmt.Println(resurl)
+	}
 
-	pk := "https://yadi.sk/i/03bE933n3PqpG2"
-	yaurl := "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=" + pk
-	//yaurl := "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=https://yadi.sk/i/03bE933n3PqpG2"
-	getYandexFile(yaurl)
+	pubkey := "https://yadi.sk/i/03bE933n3PqpG2"
+	getYandexFile("https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=" + pubkey)
 
 }
 
@@ -32,6 +33,7 @@ func strSearch(str string, urls []string) []string {
 			fmt.Println(err)
 			return resultUrls
 		}
+		defer resp.Body.Close()
 		fmt.Println(url)
 		fmt.Println(resp.Status)
 		body, err := ioutil.ReadAll(resp.Body)
@@ -51,14 +53,60 @@ func strSearch(str string, urls []string) []string {
 }
 
 func getYandexFile(yaurl string) {
-	fmt.Println(yaurl)
+	type tyad struct {
+		Href      string
+		Method    string
+		Templated bool
+	}
+
+	//!!!!!
+	//Lower case don't work!
+	// href      string
+	// method    string
+	// templated bool
+
+	var yad tyad
+
 	resp, err := http.Get(yaurl)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	defer resp.Body.Close()
 
-	fmt.Println(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = json.Unmarshal(body, &yad)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	resp, err = http.Get(yad.Href)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create("yad.pdf")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("File yad.pdf successfully copied!")
 
 }
 
@@ -75,5 +123,4 @@ func getYandexFile(yaurl string) {
 // Pages contains 'нефть':
 // https://rbc.ru
 // https://ria.ru
-
-//https://yadi.sk/i/03bE933n3PqpG2
+// File yad.pdf successfully copied!

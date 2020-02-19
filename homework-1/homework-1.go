@@ -54,18 +54,6 @@ func strSearch(str string, urls []string) []string {
 
 //func getYandexFile(yaurl string)
 func getYandexFile(yaurl string) {
-	type tyad struct {
-		Href      string
-		Method    string
-		Templated bool
-	}
-	var yad tyad
-	//!!!!!
-	//Lower case don't work!
-	// href      string
-	// method    string
-	// templated bool
-
 	resp, err := http.Get(yaurl)
 	if err != nil {
 		fmt.Println(err)
@@ -79,13 +67,26 @@ func getYandexFile(yaurl string) {
 		return
 	}
 
-	err = json.Unmarshal(body, &yad)
+	type Tyad struct {
+		Href      string
+		Method    string
+		Templated bool
+	}
+	//var yad tyad
+	Yad := Tyad{}
+	//!!!!!
+	//Lower case don't work!
+	// href      string
+	// method    string
+	// templated bool
+
+	err = json.Unmarshal(body, &Yad)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	resp, err = http.Get(yad.Href)
+	resp, err = http.Get(Yad.Href)
 	if err != nil {
 		fmt.Println(err)
 		return

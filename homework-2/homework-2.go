@@ -21,5 +21,5 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 }
 
 func helloUsername(wr http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(wr, "Hello %s!", req.URL.Query().Get("name"))
+	fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
 }

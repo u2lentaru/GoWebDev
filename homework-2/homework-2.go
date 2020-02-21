@@ -31,8 +31,6 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		wr.Write([]byte("Hello world!"))
 		return
 	}
-	fmt.Println("Request:" + string(body))
-	fmt.Println("req.URL.Path " + req.URL.Path)
 
 	type SearchStruct struct {
 		Search string   `json:"search"`
@@ -59,9 +57,8 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println(err)
-			//return resultUrls
 		}
-		fmt.Printf("There %v string counts\n", strings.Count(string(body), searchStruct.Search))
+		//fmt.Printf("There %v string counts\n", strings.Count(string(body), searchStruct.Search))
 		if strings.Contains(string(body), searchStruct.Search) {
 			resultUrls = append(resultUrls, url)
 		}
@@ -84,10 +81,8 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 }
 
 func setUsername(wr http.ResponseWriter, req *http.Request) {
-	//fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
 	cun := http.Cookie{
-		Name: "username",
-		//Value:  "thedroppedcookiehasgoldinit",
+		Name:   "username",
 		Value:  req.URL.Query().Get("name"),
 		MaxAge: 3600}
 	http.SetCookie(wr, &cun)
@@ -96,7 +91,6 @@ func setUsername(wr http.ResponseWriter, req *http.Request) {
 }
 
 func getUsername(wr http.ResponseWriter, req *http.Request) {
-	//fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
 	cun, err := req.Cookie("username")
 	if err != nil {
 		wr.Write([]byte("error in reading cookie : " + err.Error() + "\n"))

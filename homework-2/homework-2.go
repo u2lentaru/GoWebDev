@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -18,6 +19,12 @@ func main() {
 
 func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	wr.Write([]byte("Hello world!"))
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Request:" + string(body))
 }
 
 func helloUsername(wr http.ResponseWriter, req *http.Request) {

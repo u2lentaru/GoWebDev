@@ -74,7 +74,7 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Printf("%s JSON\n", resJSON)
+	//fmt.Printf("%s JSON\n", resJSON)
 	wr.Write([]byte(resJSON))
 
 }

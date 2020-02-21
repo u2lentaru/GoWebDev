@@ -27,7 +27,6 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println(err)
-		wr.Write([]byte("Hello world!"))
 		return
 	}
 
@@ -40,7 +39,6 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	err = json.Unmarshal(body, &searchStruct)
 	if err != nil {
 		fmt.Println(err)
-		wr.Write([]byte("Hello world!"))
 		return
 	}
 
@@ -70,7 +68,6 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	resJSON, err := json.Marshal(resultStruct)
 	if err != nil {
 		fmt.Println(err)
-		wr.Write([]byte("Hello world!"))
 		return
 	}
 

@@ -21,6 +21,10 @@ func main() {
 }
 
 func firstHandle(wr http.ResponseWriter, req *http.Request) {
+	if req.URL.Path == "/favicon.ico" {
+		return
+	}
+
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println(err)
@@ -28,6 +32,7 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Println("Request:" + string(body))
+	fmt.Println("req.URL.Path " + req.URL.Path)
 
 	type SearchStruct struct {
 		Search string   `json:"search"`

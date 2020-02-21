@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -18,13 +20,61 @@ func main() {
 }
 
 func firstHandle(wr http.ResponseWriter, req *http.Request) {
-	wr.Write([]byte("Hello world!"))
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println(err)
+		wr.Write([]byte("Hello world!"))
 		return
 	}
 	fmt.Println("Request:" + string(body))
+
+	type SearchStruct struct {
+		Search string   `json:"search"`
+		Sites  []string `json:"sites"`
+	}
+	searchStruct := SearchStruct{}
+
+	err = json.Unmarshal(body, &searchStruct)
+	if err != nil {
+		fmt.Println(err)
+		wr.Write([]byte("Hello world!"))
+		return
+	}
+
+	resultUrls := make([]string, 0)
+
+	for _, url := range searchStruct.Sites {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+			//return resultUrls
+		}
+		fmt.Printf("There %v string counts\n", strings.Count(string(body), searchStruct.Search))
+		if strings.Contains(string(body), searchStruct.Search) {
+			resultUrls = append(resultUrls, url)
+		}
+	}
+
+	type ResultStruct struct {
+		Sites []string `json:"sites"`
+	}
+	resultStruct := ResultStruct{resultUrls}
+	resJSON, err := json.Marshal(resultStruct)
+	if err != nil {
+		fmt.Println(err)
+		wr.Write([]byte("Hello world!"))
+		return
+	}
+
+	fmt.Printf("%s JSON\n", resJSON)
+	wr.Write([]byte(resJSON))
+
 }
 
 func helloUsername(wr http.ResponseWriter, req *http.Request) {

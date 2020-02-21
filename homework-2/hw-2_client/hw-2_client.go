@@ -14,7 +14,7 @@ func main() {
 		Sites  []string `json:"sites"`
 	}
 	searchStruct := SearchStruct{
-		Search: "нефть",
+		Search: "Трамп",
 		Sites: []string{
 			"https://tass.ru",
 			"https://rbc.ru",

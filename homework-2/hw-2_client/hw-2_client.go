@@ -31,7 +31,7 @@ func main() {
 	resp, err := http.Post("http://localhost:8080/", "application/json", bytes.NewBuffer(sendJSON))
 	if err != nil {
 		fmt.Printf("%s !error!\n", err)
-		//return
+
 	}
 	defer resp.Body.Close()
 

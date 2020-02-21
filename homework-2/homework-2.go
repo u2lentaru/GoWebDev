@@ -17,7 +17,6 @@ func main() {
 	router.HandleFunc("/getuser", getUsername)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
-
 }
 
 func firstHandle(wr http.ResponseWriter, req *http.Request) {

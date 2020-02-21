@@ -13,7 +13,8 @@ func main() {
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", firstHandle)
-	router.HandleFunc("/user", helloUsername)
+	router.HandleFunc("/setuser", setUsername)
+	router.HandleFunc("/getuser", getUsername)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 
@@ -77,6 +78,25 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 
 }
 
-func helloUsername(wr http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
+func setUsername(wr http.ResponseWriter, req *http.Request) {
+	//fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
+	cun := http.Cookie{
+		Name: "username",
+		//Value:  "thedroppedcookiehasgoldinit",
+		Value:  req.URL.Query().Get("name"),
+		MaxAge: 3600}
+	http.SetCookie(wr, &cun)
+
+	wr.Write([]byte("new cookie created!\n"))
+}
+
+func getUsername(wr http.ResponseWriter, req *http.Request) {
+	//fmt.Fprintf(wr, "Hello, %s!", req.URL.Query().Get("name"))
+	cun, err := req.Cookie("username")
+	if err != nil {
+		wr.Write([]byte("error in reading cookie : " + err.Error() + "\n"))
+	} else {
+		value := cun.Value
+		wr.Write([]byte("cookie has : " + value + "\n"))
+	}
 }

@@ -54,6 +54,8 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	resJSON, err := json.Marshal(ResultStruct)
 	if err != nil {
 		fmt.Println(err)
+		wr.Write([]byte(err.Error()))
+		wr.WriteHeader(400)
 		return
 	}
 
@@ -73,6 +75,7 @@ func search(sites []string, str string) []string {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 		//fmt.Printf("There %v string counts\n", strings.Count(string(body), SearchStruct.Search))
 		if strings.Contains(string(body), str) {

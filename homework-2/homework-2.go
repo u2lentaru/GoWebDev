@@ -49,7 +49,8 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	type TResultStruct struct {
 		Sites []string `json:"sites"`
 	}
-	ResultStruct := TResultStruct{search(SearchStruct.Sites, SearchStruct.Search)}
+	//ResultStruct := TResultStruct{search(SearchStruct.Sites, SearchStruct.Search)}
+	ResultStruct := TResultStruct{Sites: search(SearchStruct.Sites, SearchStruct.Search)}
 	resJSON, err := json.Marshal(ResultStruct)
 	if err != nil {
 		fmt.Println(err)

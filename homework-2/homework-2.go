@@ -46,29 +46,9 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	/*resultUrls := make([]string, 0, len(SearchStruct.Sites))
-
-	for _, url := range SearchStruct.Sites {
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-		}
-		//fmt.Printf("There %v string counts\n", strings.Count(string(body), SearchStruct.Search))
-		if strings.Contains(string(body), SearchStruct.Search) {
-			resultUrls = append(resultUrls, url)
-		}
-	}*/
-
 	type TResultStruct struct {
 		Sites []string `json:"sites"`
 	}
-	//ResultStruct := TResultStruct{resultUrls}
 	ResultStruct := TResultStruct{search(SearchStruct.Sites, SearchStruct.Search)}
 	resJSON, err := json.Marshal(ResultStruct)
 	if err != nil {
@@ -76,9 +56,7 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//fmt.Printf("%s JSON\n", resJSON)
 	wr.Write([]byte(resJSON))
-
 }
 
 func search(sites []string, str string) []string {
@@ -100,7 +78,6 @@ func search(sites []string, str string) []string {
 			resultUrls = append(resultUrls, url)
 		}
 	}
-
 	return resultUrls
 }
 
@@ -110,7 +87,6 @@ func setUsername(wr http.ResponseWriter, req *http.Request) {
 		Value:  req.URL.Query().Get("name"),
 		MaxAge: 3600}
 	http.SetCookie(wr, &cun)
-
 	wr.Write([]byte("new cookie created!\n"))
 }
 

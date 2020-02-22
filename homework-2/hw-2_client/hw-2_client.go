@@ -25,6 +25,7 @@ func main() {
 	sendJSON, err := json.Marshal(searchStruct)
 	if err != nil {
 		fmt.Printf("%s", err)
+		return
 	}
 	fmt.Printf("%s JSON\n", sendJSON)
 
@@ -40,6 +41,16 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(body))
 
+	type ResultStruct struct {
+		Sites []string `json:"sites"`
+	}
+	RSites := ResultStruct{}
+
+	err = json.Unmarshal(body, &RSites)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(RSites)
 }

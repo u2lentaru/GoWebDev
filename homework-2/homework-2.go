@@ -27,24 +27,28 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println(err)
+		wr.Write([]byte(err.Error()))
+		wr.WriteHeader(400)
 		return
 	}
 
-	type SearchStruct struct {
+	type TSearchStruct struct {
 		Search string   `json:"search"`
 		Sites  []string `json:"sites"`
 	}
-	searchStruct := SearchStruct{}
+	SearchStruct := TSearchStruct{}
 
-	err = json.Unmarshal(body, &searchStruct)
+	err = json.Unmarshal(body, &SearchStruct)
 	if err != nil {
 		fmt.Println(err)
+		wr.Write([]byte(err.Error()))
+		wr.WriteHeader(400)
 		return
 	}
 
-	resultUrls := make([]string, 0)
+	/*resultUrls := make([]string, 0, len(SearchStruct.Sites))
 
-	for _, url := range searchStruct.Sites {
+	for _, url := range SearchStruct.Sites {
 		resp, err := http.Get(url)
 		if err != nil {
 			fmt.Println(err)
@@ -55,17 +59,18 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		//fmt.Printf("There %v string counts\n", strings.Count(string(body), searchStruct.Search))
-		if strings.Contains(string(body), searchStruct.Search) {
+		//fmt.Printf("There %v string counts\n", strings.Count(string(body), SearchStruct.Search))
+		if strings.Contains(string(body), SearchStruct.Search) {
 			resultUrls = append(resultUrls, url)
 		}
-	}
+	}*/
 
-	type ResultStruct struct {
+	type TResultStruct struct {
 		Sites []string `json:"sites"`
 	}
-	resultStruct := ResultStruct{resultUrls}
-	resJSON, err := json.Marshal(resultStruct)
+	//ResultStruct := TResultStruct{resultUrls}
+	ResultStruct := TResultStruct{search(SearchStruct.Sites, SearchStruct.Search)}
+	resJSON, err := json.Marshal(ResultStruct)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -74,6 +79,29 @@ func firstHandle(wr http.ResponseWriter, req *http.Request) {
 	//fmt.Printf("%s JSON\n", resJSON)
 	wr.Write([]byte(resJSON))
 
+}
+
+func search(sites []string, str string) []string {
+	resultUrls := make([]string, 0, len(sites))
+
+	for _, url := range sites {
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+		}
+		//fmt.Printf("There %v string counts\n", strings.Count(string(body), SearchStruct.Search))
+		if strings.Contains(string(body), str) {
+			resultUrls = append(resultUrls, url)
+		}
+	}
+
+	return resultUrls
 }
 
 func setUsername(wr http.ResponseWriter, req *http.Request) {
@@ -90,8 +118,7 @@ func getUsername(wr http.ResponseWriter, req *http.Request) {
 	cun, err := req.Cookie("username")
 	if err != nil {
 		wr.Write([]byte("error in reading cookie : " + err.Error() + "\n"))
-	} else {
-		value := cun.Value
-		wr.Write([]byte("cookie has : " + value + "\n"))
+		return
 	}
+	wr.Write([]byte("cookie has : " + cun.Value + "\n"))
 }

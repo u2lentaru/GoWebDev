@@ -10,7 +10,7 @@
     <p>{{.Title}}</p>
     <ul>
         {{range .PostList}}
-        <li>{{.Subj}} </li>
+        <li>{{.Subj}} {{.PostTime}} {{.Text}} </li>
         {{end}}
     </ul>
 </body>

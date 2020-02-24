@@ -20,7 +20,7 @@ type TBlog struct {
 	PostList []TPost
 }
 
-var tmpl = template.Must(template.New("MyTemplate").ParseFiles("tmpl.html"))
+var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
 
 //MyBlog - my blog variable
 var MyBlog = TBlog{

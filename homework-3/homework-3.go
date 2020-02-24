@@ -6,19 +6,22 @@ import (
 	"net/http"
 )
 
+//TPost - post struct
 type TPost struct {
 	Subj     string
 	PostTime string
 	Text     string
 }
 
+//TBlog - blog struct
 type TBlog struct {
 	Title    string
 	PostList []TPost
 }
 
-var tmpl = template.Must(template.New("MyTemplate").ParseFile("tmpl.html"))
+var tmpl = template.Must(template.New("MyTemplate").ParseFiles("tmpl.html"))
 
+//MyBlog - my blog variable
 var MyBlog = TBlog{
 	Title: "My blog",
 	PostList: []TPost{

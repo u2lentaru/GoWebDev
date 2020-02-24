@@ -37,6 +37,7 @@ func main() {
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", viewList)
+	router.HandleFunc("/post", viewPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -45,4 +46,8 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
 		log.Println(err)
 	}
+}
+
+func viewPost(w http.ResponseWriter, r *http.Request) {
+	return
 }

@@ -1,24 +1,43 @@
 package main
 
+import (
+	"html/template"
+	"log"
+	"net/http"
+)
+
+type TPost struct {
+	Subj     string
+	PostTime string
+	Text     string
+}
+
+type TBlog struct {
+	Title    string
+	PostList []TPost
+}
+
+var tmpl = template.Must(template.New("MyTemplate").ParseFile("tmpl.html"))
+
+var MyBlog = TBlog{
+	Title: "My blog",
+	PostList: []TPost{
+		TPost{"1st subj", "01.01.2020", "1st text"},
+		TPost{"2nd subj", "02.01.2020", "2nd text"},
+		TPost{"3rd subj", "03.01.2020", "3rd text"},
+	},
+}
+
 func main() {
-	type TPost struct {
-		Subj     string
-		PostTime string
-		Text     string
-	}
+	router := http.NewServeMux()
 
-	type TBlog struct {
-		Title    string
-		PostList []TPost
-	}
+	router.HandleFunc("/", viewList)
 
-	var MyBlog = TBlog{
-		Title: "My blog",
-		PostList: []TPost{
-			TPost{"1st subj", "01.01.2020", "1st text"},
-			TPost{"2nd subj", "02.01.2020", "2nd text"},
-			TPost{"3rd subj", "03.01.2020", "3rd text"},
-		},
-	}
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
 
+func viewList(w http.ResponseWriter, r *http.Request) {
+	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
+		log.Println(err)
+	}
 }

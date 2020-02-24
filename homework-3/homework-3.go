@@ -21,6 +21,7 @@ type TBlog struct {
 }
 
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
+var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
 
 //MyBlog - my blog variable
 var MyBlog = TBlog{
@@ -49,5 +50,7 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
-	return
+	if err := post.ExecuteTemplate(w, "post", MyBlog.PostList[0]); err != nil {
+		log.Println(err)
+	}
 }

@@ -15,6 +15,7 @@ type TPost struct {
 
 //TBlog - blog struct
 type TBlog struct {
+	Name     string
 	Title    string
 	PostList []TPost
 }
@@ -23,6 +24,7 @@ var tmpl = template.Must(template.New("MyTemplate").ParseFiles("tmpl.html"))
 
 //MyBlog - my blog variable
 var MyBlog = TBlog{
+	Name:  "Blog",
 	Title: "My blog",
 	PostList: []TPost{
 		TPost{"1st subj", "01.01.2020", "1st text"},

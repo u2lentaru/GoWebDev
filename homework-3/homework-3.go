@@ -21,8 +21,8 @@ type TBlog struct {
 }
 
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
-var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
-var edit = template.Must(template.New("MyEditPost").ParseFiles("./homework-3/edit.html"))
+var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/edit.html"))
+var editpost = template.Must(template.New("MyEditPost").ParseFiles("./homework-3/edit.html"))
 
 //MyBlog - my blog variable
 var MyBlog = TBlog{
@@ -58,7 +58,7 @@ func viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPost(w http.ResponseWriter, r *http.Request) {
-	if err := post.ExecuteTemplate(w, "edit", MyBlog.PostList[0]); err != nil {
+	if err := post.ExecuteTemplate(w, "editpost", MyBlog.PostList[0]); err != nil {
 		log.Println(err)
 	}
 }

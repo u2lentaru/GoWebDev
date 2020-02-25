@@ -22,6 +22,7 @@ type TBlog struct {
 
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
 var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
+var edit = template.Must(template.New("MyEditPost").ParseFiles("./homework-3/edit.html"))
 
 //MyBlog - my blog variable
 var MyBlog = TBlog{
@@ -39,6 +40,7 @@ func main() {
 
 	router.HandleFunc("/", viewList)
 	router.HandleFunc("/post", viewPost)
+	router.HandleFunc("/edit", editPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -51,6 +53,12 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
 	if err := post.ExecuteTemplate(w, "post", MyBlog.PostList[0]); err != nil {
+		log.Println(err)
+	}
+}
+
+func editPost(w http.ResponseWriter, r *http.Request) {
+	if err := post.ExecuteTemplate(w, "edit", MyBlog.PostList[0]); err != nil {
 		log.Println(err)
 	}
 }

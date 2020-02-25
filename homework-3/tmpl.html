@@ -10,7 +10,7 @@
     <p>{{.Title}}</p>
     <ul>
         {{range .PostList}}
-        <li>{{.PostTime}}&nbsp:&nbsp<a href="/post">{{.Subj}}</a></li>
+        <li>{{.PostTime}}&nbsp:&nbsp<a href="/post/{{.ID}}">{{.Subj}}</a></li>
         {{end}}
     </ul>
 </body>

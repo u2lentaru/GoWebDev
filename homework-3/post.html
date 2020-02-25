@@ -7,10 +7,10 @@
     <title>{{.Subj}}</title>
 </head>
 <body>
-    <p>Viewing{{.Subj}}</p>
+    <p>Viewing&nbsp{{.Subj}}</p>
     <p>{{.PostTime}} </p>
     <p>{{.Text}}</p>
-    <p><a href="/edit">Edit &nbsp{{.Subj}}</a></p>
+    <p><a href="/edit/{{.ID}}">Edit &nbsp{{.Subj}}</a></p>
 </body>
 </html>
 {{end}}

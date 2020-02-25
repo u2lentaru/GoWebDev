@@ -9,9 +9,8 @@
 <body>
     <p>Viewing{{.Subj}}</p>
     <p>{{.PostTime}} </p>
-    <ul>
-        <li>{{.Text}}</li>
-    </ul>
+    <p>{{.Text}}</p>
+    <p><a href="/edit">Edit &nbsp{{.Subj}}</a></p>
 </body>
 </html>
 {{end}}

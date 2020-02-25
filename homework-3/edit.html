@@ -8,8 +8,8 @@
 </head>
 <body>
     <form action="/" method="POST">
-    <div><input type="text" value={{.Subj}}></div>
-    <div><input type="text" value={{.PostTime}}></div>
+    <div><input type="text" name="fsubj" value={{.Subj}}></div>
+    <div><input type="text" name="fpt" value={{.PostTime}}></div>
     <div><textarea name="body" rows="20" cols="80">
         {{.Text}}
         </textarea></div>

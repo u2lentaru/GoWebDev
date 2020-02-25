@@ -55,7 +55,6 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
 	indp, err := strconv.ParseInt(r.URL.Path[len("/post/"):], 10, 16)
-
 	if err != nil {
 		log.Println(err)
 		return
@@ -76,4 +75,6 @@ func editPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
 		log.Println(err)
 	}
+	//r.ParseForm()
+	//fmt.Fprintln(w, r.Form["fsubj"])
 }

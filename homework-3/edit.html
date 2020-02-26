@@ -7,14 +7,15 @@
     <title>Editing&nbsp{{.Subj}}</title>
 </head>
 <body>
-    <form action="/" method="POST">
+    <form action="/save" method="GET" enctype="application/x-www-form-urlencoded">
+    <div><input type="hidden" name="id" value="{{.ID}}"></div>
     <div><input type="text" name="fsubj" value={{.Subj}}></div>
     <div><input type="text" name="fpt" value={{.PostTime}}></div>
     <div><textarea name="body" rows="20" cols="80">
         {{.Text}}
         </textarea></div>
-        <div><input type="submit" value="Save"></div>
-        </form>
+    <div><input type="submit" value="Save"></div>
+    </form>
 </body>
 </html>
 {{end}}

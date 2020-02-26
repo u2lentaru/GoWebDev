@@ -43,6 +43,8 @@ func main() {
 	router.HandleFunc("/", viewList)
 	router.HandleFunc("/post/", viewPost)
 	router.HandleFunc("/edit/", editPost)
+	router.HandleFunc("/save/", savePost)
+	router.HandleFunc("/new", newPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -75,6 +77,33 @@ func editPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
 		log.Println(err)
 	}
-	//r.ParseForm()
-	//fmt.Fprintln(w, r.Form["fsubj"])
+}
+
+func savePost(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	indp, err := strconv.ParseInt(string(r.FormValue("id")), 10, 16)
+	if err != nil {
+		log.Println(err)
+		http.Redirect(w, r, "/", 500)
+	}
+	MyBlog.PostList[indp].PostTime = r.FormValue("fpt")
+	MyBlog.PostList[indp].Subj = r.FormValue("fsubj")
+	MyBlog.PostList[indp].Text = r.FormValue("body")
+
+	http.Redirect(w, r, "/", 303)
+}
+
+func newPost(w http.ResponseWriter, r *http.Request) {
+	indp := len(MyBlog.PostList)
+	log.Println(indp)
+	newp := TPost{strconv.Itoa(indp), "", "", ""}
+	log.Println(newp)
+	MyBlog.PostList = append(MyBlog.PostList, newp)
+	log.Println(MyBlog.PostList[indp])
+	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
+		log.Println(err)
+	}
+
+	http.Redirect(w, r, "/", 303)
 }

@@ -44,7 +44,7 @@ func main() {
 	router.HandleFunc("/post/", viewPost)
 	router.HandleFunc("/edit/", editPost)
 	router.HandleFunc("/save/", savePost)
-	router.HandleFunc("/new", newPost)
+	router.HandleFunc("/new/", newPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -96,11 +96,11 @@ func savePost(w http.ResponseWriter, r *http.Request) {
 func newPost(w http.ResponseWriter, r *http.Request) {
 	indp := len(MyBlog.PostList)
 	newp := TPost{strconv.Itoa(indp), "", "", ""}
+
 	MyBlog.PostList = append(MyBlog.PostList, newp)
-	log.Println(MyBlog.PostList[indp])
+
 	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
 		log.Println(err)
 	}
 
-	http.Redirect(w, r, "/", 303)
 }

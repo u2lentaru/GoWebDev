@@ -68,7 +68,7 @@ func viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPost(w http.ResponseWriter, r *http.Request) {
-	indp, err := strconv.ParseInt(r.URL.Path[len("/post/"):], 10, 16)
+	indp, err := strconv.ParseInt(r.URL.Path[len("/edit/"):], 10, 16)
 	if err != nil {
 		log.Println(err)
 		return

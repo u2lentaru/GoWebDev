@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+
+	_ "github.com/go-sql-driver/MySQL"
 )
 
 //TPost - post struct
@@ -37,7 +40,23 @@ var MyBlog = TBlog{
 	},
 }
 
+//DSN - MySQL Data Source Name
+var DSN = "root:12345@tcp(localhost:3306)/shop?charset=utf8"
+
 func main() {
+	db, err := sql.Open("mysql", DSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	log.Printf("db= %v", db)
+
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("db pinged!")
+	}
+
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", viewList)

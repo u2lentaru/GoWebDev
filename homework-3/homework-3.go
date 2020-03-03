@@ -128,12 +128,20 @@ func savePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func newPost(w http.ResponseWriter, r *http.Request) {
-	indp := len(MyBlog.PostList)
+	var indp int
+
+	res, err := database.Exec(fmt.Sprintf("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')"))
+	if err != nil {
+		log.Printf("err %v, res %v", err, res)
+	}
+	row := database.QueryRow(fmt.Sprintf("select MAX(id) from myblog.posts where blogid = '1'"))
+	err = row.Scan(&indp)
+	if err != nil {
+		log.Println(err)
+	}
 	newp := TPost{strconv.Itoa(indp), "", "", ""}
-
-	MyBlog.PostList = append(MyBlog.PostList, newp)
-
-	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
+	//if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
+	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)
 	}
 }

@@ -101,13 +101,8 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
-	indp, err := strconv.ParseInt(r.URL.Path[len("/post/"):], 10, 16)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := post.ExecuteTemplate(w, "post", MyBlog.PostList[indp]); err != nil {
+	dbpost, _ := GetPost(r.URL.Path[len("/post/"):])
+	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
 		log.Println(err)
 	}
 }
@@ -175,4 +170,19 @@ func GetBlog(id string) (TBlog, error) {
 		blog.PostList = append(blog.PostList, post)
 	}
 	return blog, nil
+}
+
+// GetPost - get post from database
+func GetPost(id string) (TPost, error) {
+	post := TPost{}
+
+	row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
+	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
+	if err != nil {
+		return post, err
+	}
+
+	log.Println(post)
+
+	return post, nil
 }

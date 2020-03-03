@@ -108,27 +108,21 @@ func viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPost(w http.ResponseWriter, r *http.Request) {
-	indp, err := strconv.ParseInt(r.URL.Path[len("/edit/"):], 10, 16)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
+	dbpost, _ := GetPost(r.URL.Path[len("/edit/"):])
+	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
 		log.Println(err)
 	}
 }
 
 func savePost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	indp, err := strconv.ParseInt(string(r.FormValue("id")), 10, 16)
+
+	res, err := database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
+		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id")))
+
 	if err != nil {
-		log.Println(err)
-		http.Redirect(w, r, "/", 500)
+		log.Printf("res %v, err %v", res, err)
 	}
-	MyBlog.PostList[indp].PostTime = r.FormValue("fpt")
-	MyBlog.PostList[indp].Subj = r.FormValue("fsubj")
-	MyBlog.PostList[indp].Text = r.FormValue("body")
 
 	http.Redirect(w, r, "/", 303)
 }
@@ -181,8 +175,6 @@ func GetPost(id string) (TPost, error) {
 	if err != nil {
 		return post, err
 	}
-
-	log.Println(post)
-
+	//log.Println(post)
 	return post, nil
 }

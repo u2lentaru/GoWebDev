@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,7 +11,20 @@ import (
 	_ "github.com/go-sql-driver/MySQL"
 )
 
-//TPost - post struct
+// TBlog - blog struct
+type TBlog struct {
+	ID       string
+	Name     string
+	Title    string
+	PostList []TPost
+}
+
+// mysql> CREATE TABLE blogs (
+//    -> id SERIAL PRIMARY KEY,
+//    -> name VARCHAR(255) NOT NULL,
+//    -> title VARCHAR(255) NOT NULL);
+
+// TPost - post struct
 type TPost struct {
 	ID       string
 	Subj     string
@@ -18,19 +32,22 @@ type TPost struct {
 	Text     string
 }
 
-//TBlog - blog struct
-type TBlog struct {
-	Name     string
-	Title    string
-	PostList []TPost
-}
+// mysql> CREATE TABLE posts (
+//    -> id SERIAL PRIMARY KEY,
+//    -> blogid INT NOT NULL,
+//   -> subj VARCHAR(255) NOT NULL,
+//    -> posttime TIMESTAMP NOT NULL,
+//    -> posttext TEXT NOT NULL);
 
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
 var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
 var edit = template.Must(template.New("MyPost").ParseFiles("./homework-3/edit.html"))
+var database *sql.DB
 
-//MyBlog - my blog variable
-var MyBlog = TBlog{
+// MyBlog - my blog variable
+var MyBlog TBlog
+
+/*var MyBlog = TBlog{
 	Name:  "Blog",
 	Title: "My blog",
 	PostList: []TPost{
@@ -38,24 +55,32 @@ var MyBlog = TBlog{
 		TPost{"1", "2nd subj", "02.01.2020", "2nd text"},
 		TPost{"2", "3rd subj", "03.01.2020", "3rd text"},
 	},
-}
+}*/
 
-//DSN - MySQL Data Source Name
-var DSN = "root:12345@tcp(localhost:3306)/shop?charset=utf8"
+// mysql> INSERT INTO blogs (name, title) VALUES (
+//    -> "Blog", "My Blog");
+// mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
+//    -> 1,"1st subj",NOW()-100000,"1st text"),
+//    -> (1,"2nd subj",NOW()-10000,"2st text"),
+//    -> (1,"3rd subj",NOW(),"3rd text");
+
+// DSN - MySQL Data Source Name
+var DSN = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
 
 func main() {
 	db, err := sql.Open("mysql", DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-	log.Printf("db= %v", db)
+	database = db
+	defer database.Close()
+	log.Printf("db= %v", database)
 
-	if err := db.Ping(); err != nil {
+	if err := database.Ping(); err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println("db pinged!")
 	}
+	log.Println("db pinged!")
+	//log.Println(blog)
 
 	router := http.NewServeMux()
 
@@ -69,6 +94,7 @@ func main() {
 }
 
 func viewList(w http.ResponseWriter, r *http.Request) {
+	MyBlog, _ := GetBlog(strconv.Itoa(1))
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
 		log.Println(err)
 	}
@@ -121,5 +147,32 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
 		log.Println(err)
 	}
+}
 
+// GetBlog - get blog from database
+func GetBlog(id string) (TBlog, error) {
+	blog := TBlog{}
+
+	row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
+	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
+	if err != nil {
+		return blog, err
+	}
+
+	rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
+	if err != nil {
+		return blog, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		post := TPost{}
+		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		blog.PostList = append(blog.PostList, post)
+	}
+	return blog, nil
 }

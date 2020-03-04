@@ -75,7 +75,7 @@ func main() {
 	}
 	database = db
 	defer database.Close()
-	log.Printf("db= %v", database)
+	//log.Printf("db= %v", database)
 
 	if err := database.Ping(); err != nil {
 		log.Fatal(err)
@@ -135,16 +135,12 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("err %v, res %v", err, res)
 	}
-	//row := database.QueryRow(fmt.Sprintf("select MAX(id) from myblog.posts where blogid = '1'"))
 	row := database.QueryRow(fmt.Sprintf("select LAST_INSERT_ID() from myblog.posts"))
 	err = row.Scan(&indp)
 	if err != nil {
 		log.Println(err)
 	}
-	dt := time.Now().Format("2020-03-04 17:04:05")
-	//dt := time.Now().String()
-	newp := TPost{strconv.Itoa(indp), "", dt, ""}
-	//if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
+	newp := TPost{ID: strconv.Itoa(indp), Subj: "", PostTime: time.Now().Format("2006-01-02 15:04:05"), Text: ""}
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)
 	}

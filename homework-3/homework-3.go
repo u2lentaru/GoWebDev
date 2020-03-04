@@ -141,7 +141,7 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	dt := time.Now().Format("01-02-2006 15:04:05")
+	dt := time.Now().Format("2020-03-04 17:04:05")
 	//dt := time.Now().String()
 	newp := TPost{strconv.Itoa(indp), "", dt, ""}
 	//if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {

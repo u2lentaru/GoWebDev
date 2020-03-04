@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/MySQL"
 )
@@ -134,12 +135,15 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("err %v, res %v", err, res)
 	}
-	row := database.QueryRow(fmt.Sprintf("select MAX(id) from myblog.posts where blogid = '1'"))
+	//row := database.QueryRow(fmt.Sprintf("select MAX(id) from myblog.posts where blogid = '1'"))
+	row := database.QueryRow(fmt.Sprintf("select LAST_INSERT_ID() from myblog.posts"))
 	err = row.Scan(&indp)
 	if err != nil {
 		log.Println(err)
 	}
-	newp := TPost{strconv.Itoa(indp), "", "", ""}
+	dt := time.Now().Format("01-02-2006 15:04:05")
+	//dt := time.Now().String()
+	newp := TPost{strconv.Itoa(indp), "", dt, ""}
 	//if err := edit.ExecuteTemplate(w, "edit", MyBlog.PostList[indp]); err != nil {
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)

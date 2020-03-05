@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/MySQL"
@@ -90,6 +91,7 @@ func main() {
 	router.HandleFunc("/edit/", editPost)
 	router.HandleFunc("/save/", savePost)
 	router.HandleFunc("/new/", newPost)
+	router.HandleFunc("/del/", delPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -144,6 +146,15 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)
 	}
+}
+
+func delPost(w http.ResponseWriter, r *http.Request) {
+	//res, err := database.Exec("delete from myblog.posts where id = ?", r.URL.Path[len("/del/"):])
+	res, err := database.Exec("delete from myblog.posts where id = ?", strings.Split(r.URL.Path, "/")[2])
+	if err != nil {
+		log.Printf("err %v, res %v", err, res)
+	}
+	http.Redirect(w, r, "/", 303)
 }
 
 // GetBlog - get blog from database

@@ -76,13 +76,11 @@ func main() {
 	}
 	database = db
 	defer database.Close()
-	//log.Printf("db= %v", database)
 
 	if err := database.Ping(); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("db pinged!")
-	//log.Println(blog)
 
 	router := http.NewServeMux()
 

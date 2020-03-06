@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -54,8 +53,9 @@ func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
 func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	res, err := server.database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
-		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id")))
+	//res, err := server.database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
+	res, err := server.database.Exec("update myblog.posts set subj = ?, posttime = ?, posttext = ? where id = ?",
+		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id"))
 
 	if err != nil {
 		log.Printf("res %v, err %v", res, err)
@@ -67,11 +67,11 @@ func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 	var indp int
 
-	res, err := server.database.Exec(fmt.Sprintf("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')"))
+	res, err := server.database.Exec("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')")
 	if err != nil {
 		log.Printf("err %v, res %v", err, res)
 	}
-	row := server.database.QueryRow(fmt.Sprintf("select LAST_INSERT_ID() from myblog.posts"))
+	row := server.database.QueryRow("select LAST_INSERT_ID() from myblog.posts")
 	err = row.Scan(&indp)
 	if err != nil {
 		log.Println(err)
@@ -142,9 +142,10 @@ mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
 */
 
 // DSN - MySQL Data Source Name
-var DSN = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
+//var DSN = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
 
 func main() {
+	DSN := "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
 	db, err := sql.Open("mysql", DSN)
 	if err != nil {
 		log.Fatal(err)
@@ -253,14 +254,14 @@ func GetBlog(db *sql.DB, id string) (TBlog, error) {
 	blog := TBlog{}
 
 	//row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
-	row := db.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
+	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
 		return TBlog{}, err
 	}
 
 	//rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
-	rows, err := db.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
+	rows, err := db.Query("select * from posts where blogid = ?", id)
 	if err != nil {
 		return TBlog{}, err
 	}
@@ -284,11 +285,10 @@ func GetPost(db *sql.DB, id string) (TPost, error) {
 	post := TPost{}
 
 	//row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
-	row := db.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
+	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
 	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
 	if err != nil {
 		return TPost{}, err
 	}
-	//log.Println(post)
 	return post, nil
 }

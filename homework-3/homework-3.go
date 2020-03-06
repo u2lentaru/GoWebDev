@@ -53,14 +53,12 @@ func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
 func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	//res, err := server.database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
 	res, err := server.database.Exec("update myblog.posts set subj = ?, posttime = ?, posttext = ? where id = ?",
 		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id"))
 
 	if err != nil {
 		log.Fatalf("res %v, err %v", res, err)
 	}
-
 	http.Redirect(w, r, "/", 303)
 }
 
@@ -140,9 +138,6 @@ mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
    -> (1,"3rd subj",NOW(),"3rd text");
 */
 
-// DSN - MySQL Data Source Name
-//var DSN = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
-
 func main() {
 	DSN := "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
 	db, err := sql.Open("mysql", DSN)
@@ -160,7 +155,6 @@ func main() {
 
 	router := http.NewServeMux()
 
-	//router.HandleFunc("/", viewList)
 	router.HandleFunc("/", serv.viewList)
 	router.HandleFunc("/post/", serv.viewPost)
 	router.HandleFunc("/edit/", serv.editPost)
@@ -171,95 +165,16 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-/*func viewList(w http.ResponseWriter, r *http.Request) {
-	MyBlog, err := GetBlog(strconv.Itoa(1))
-	if err != nil {
-		log.Println(err)
-	}
-	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
-		log.Println(err)
-	}
-}*/
-
-/*func viewPost(w http.ResponseWriter, r *http.Request) {
-	url := strings.Split(r.URL.Path, "/")
-	dbpost, err := GetPost(url[len(url)-1])
-	if err != nil {
-		log.Println(err)
-	}
-	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
-		log.Println(err)
-	}
-}*/
-
-/*func editPost(w http.ResponseWriter, r *http.Request) {
-	url := strings.Split(r.URL.Path, "/")
-	dbpost, err := GetPost(url[len(url)-1])
-	if err != nil {
-		log.Println(err)
-	}
-	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
-		log.Println(err)
-	}
-}*/
-
-/*func savePost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-
-	res, err := database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
-		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id")))
-
-	if err != nil {
-		log.Printf("res %v, err %v", res, err)
-	}
-
-	http.Redirect(w, r, "/", 303)
-}*/
-
-/*func newPost(w http.ResponseWriter, r *http.Request) {
-	var indp int
-
-	res, err := database.Exec(fmt.Sprintf("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')"))
-	if err != nil {
-		log.Printf("err %v, res %v", err, res)
-	}
-	row := database.QueryRow(fmt.Sprintf("select LAST_INSERT_ID() from myblog.posts"))
-	err = row.Scan(&indp)
-	if err != nil {
-		log.Println(err)
-	}
-	newp := TPost{
-		ID:       strconv.Itoa(indp),
-		Subj:     "",
-		PostTime: time.Now().Format("2006-01-02 15:04:05"),
-		Text:     ""}
-	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
-		log.Println(err)
-	}
-}*/
-
-/*func delPost(w http.ResponseWriter, r *http.Request) {
-	url := strings.Split(r.URL.Path, "/")
-	res, err := database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
-	if err != nil {
-		log.Printf("err %v, res %v", err, res)
-	}
-	http.Redirect(w, r, "/", 303)
-}*/
-
 // GetBlog - get blog from database
-//func GetBlog(id string) (TBlog, error) {
 func GetBlog(db *sql.DB, id string) (TBlog, error) {
 	blog := TBlog{}
 
-	//row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
 	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
 		return TBlog{}, err
 	}
 
-	//rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
 	rows, err := db.Query("select * from posts where blogid = ?", id)
 	if err != nil {
 		return TBlog{}, err
@@ -279,11 +194,8 @@ func GetBlog(db *sql.DB, id string) (TBlog, error) {
 }
 
 // GetPost - get post from database
-//func GetPost(id string) (TPost, error) {
 func GetPost(db *sql.DB, id string) (TPost, error) {
 	post := TPost{}
-
-	//row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
 	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
 	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
 	if err != nil {

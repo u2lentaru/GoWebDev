@@ -144,7 +144,11 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	newp := TPost{ID: strconv.Itoa(indp), Subj: "", PostTime: time.Now().Format("2006-01-02 15:04:05"), Text: ""}
+	newp := TPost{
+		ID:       strconv.Itoa(indp),
+		Subj:     "",
+		PostTime: time.Now().Format("2006-01-02 15:04:05"),
+		Text:     ""}
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)
 	}

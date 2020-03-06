@@ -95,21 +95,30 @@ func main() {
 }
 
 func viewList(w http.ResponseWriter, r *http.Request) {
-	MyBlog, _ := GetBlog(strconv.Itoa(1))
+	MyBlog, err := GetBlog(strconv.Itoa(1))
+	if err != nil {
+		log.Println(err)
+	}
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
 		log.Println(err)
 	}
 }
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
-	dbpost, _ := GetPost(r.URL.Path[len("/post/"):])
+	dbpost, err := GetPost(r.URL.Path[len("/post/"):])
+	if err != nil {
+		log.Println(err)
+	}
 	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
 		log.Println(err)
 	}
 }
 
 func editPost(w http.ResponseWriter, r *http.Request) {
-	dbpost, _ := GetPost(r.URL.Path[len("/edit/"):])
+	dbpost, err := GetPost(r.URL.Path[len("/edit/"):])
+	if err != nil {
+		log.Println(err)
+	}
 	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
 		log.Println(err)
 	}

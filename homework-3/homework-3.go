@@ -16,7 +16,83 @@ import (
 // Server - server struct
 type Server struct {
 	database *sql.DB
-	currBlog int
+	currBlog string
+}
+
+func (server *Server) viewList(w http.ResponseWriter, r *http.Request) {
+	MyBlog, err := GetBlog(server.database, server.currBlog)
+	if err != nil {
+		log.Println(err)
+	}
+	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
+		log.Println(err)
+	}
+}
+
+func (server *Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	url := strings.Split(r.URL.Path, "/")
+	dbpost, err := GetPost(server.database, url[len(url)-1])
+	if err != nil {
+		log.Println(err)
+	}
+	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
+		log.Println(err)
+	}
+}
+
+func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
+	url := strings.Split(r.URL.Path, "/")
+	dbpost, err := GetPost(server.database, url[len(url)-1])
+	if err != nil {
+		log.Println(err)
+	}
+	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
+		log.Println(err)
+	}
+}
+
+func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	res, err := server.database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
+		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id")))
+
+	if err != nil {
+		log.Printf("res %v, err %v", res, err)
+	}
+
+	http.Redirect(w, r, "/", 303)
+}
+
+func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
+	var indp int
+
+	res, err := server.database.Exec(fmt.Sprintf("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')"))
+	if err != nil {
+		log.Printf("err %v, res %v", err, res)
+	}
+	row := server.database.QueryRow(fmt.Sprintf("select LAST_INSERT_ID() from myblog.posts"))
+	err = row.Scan(&indp)
+	if err != nil {
+		log.Println(err)
+	}
+	newp := TPost{
+		ID:       strconv.Itoa(indp),
+		Subj:     "",
+		PostTime: time.Now().Format("2006-01-02 15:04:05"),
+		Text:     ""}
+	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
+		log.Println(err)
+	}
+}
+
+func (server *Server) delPost(w http.ResponseWriter, r *http.Request) {
+	url := strings.Split(r.URL.Path, "/")
+	res, err := server.database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
+	if err != nil {
+		log.Printf("err %v, res %v", err, res)
+	}
+	http.Redirect(w, r, "/", 303)
 }
 
 // TBlog - blog struct
@@ -73,27 +149,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	database = db
-	defer database.Close()
+	//database = db
+	serv := Server{database: db, currBlog: "1"}
+	defer serv.database.Close()
 
-	if err := database.Ping(); err != nil {
+	if err := serv.database.Ping(); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("db pinged!")
 
 	router := http.NewServeMux()
 
-	router.HandleFunc("/", viewList)
-	router.HandleFunc("/post/", viewPost)
-	router.HandleFunc("/edit/", editPost)
-	router.HandleFunc("/save/", savePost)
-	router.HandleFunc("/new/", newPost)
-	router.HandleFunc("/del/", delPost)
+	//router.HandleFunc("/", viewList)
+	router.HandleFunc("/", serv.viewList)
+	router.HandleFunc("/post/", serv.viewPost)
+	router.HandleFunc("/edit/", serv.editPost)
+	router.HandleFunc("/save/", serv.savePost)
+	router.HandleFunc("/new/", serv.newPost)
+	router.HandleFunc("/del/", serv.delPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func viewList(w http.ResponseWriter, r *http.Request) {
+/*func viewList(w http.ResponseWriter, r *http.Request) {
 	MyBlog, err := GetBlog(strconv.Itoa(1))
 	if err != nil {
 		log.Println(err)
@@ -101,9 +179,9 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
 		log.Println(err)
 	}
-}
+}*/
 
-func viewPost(w http.ResponseWriter, r *http.Request) {
+/*func viewPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(url[len(url)-1])
 	if err != nil {
@@ -112,9 +190,9 @@ func viewPost(w http.ResponseWriter, r *http.Request) {
 	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
 		log.Println(err)
 	}
-}
+}*/
 
-func editPost(w http.ResponseWriter, r *http.Request) {
+/*func editPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(url[len(url)-1])
 	if err != nil {
@@ -123,9 +201,9 @@ func editPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
 		log.Println(err)
 	}
-}
+}*/
 
-func savePost(w http.ResponseWriter, r *http.Request) {
+/*func savePost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	res, err := database.Exec(fmt.Sprintf("update myblog.posts set subj='%v', posttime='%v', posttext='%v' where id='%v'",
@@ -136,9 +214,9 @@ func savePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/", 303)
-}
+}*/
 
-func newPost(w http.ResponseWriter, r *http.Request) {
+/*func newPost(w http.ResponseWriter, r *http.Request) {
 	var indp int
 
 	res, err := database.Exec(fmt.Sprintf("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')"))
@@ -158,28 +236,31 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
 		log.Println(err)
 	}
-}
+}*/
 
-func delPost(w http.ResponseWriter, r *http.Request) {
+/*func delPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	res, err := database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
 	if err != nil {
 		log.Printf("err %v, res %v", err, res)
 	}
 	http.Redirect(w, r, "/", 303)
-}
+}*/
 
 // GetBlog - get blog from database
-func GetBlog(id string) (TBlog, error) {
+//func GetBlog(id string) (TBlog, error) {
+func GetBlog(db *sql.DB, id string) (TBlog, error) {
 	blog := TBlog{}
 
-	row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
+	//row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
+	row := db.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
 		return TBlog{}, err
 	}
 
-	rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
+	//rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
+	rows, err := db.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
 	if err != nil {
 		return TBlog{}, err
 	}
@@ -198,10 +279,12 @@ func GetBlog(id string) (TBlog, error) {
 }
 
 // GetPost - get post from database
-func GetPost(id string) (TPost, error) {
+//func GetPost(id string) (TPost, error) {
+func GetPost(db *sql.DB, id string) (TPost, error) {
 	post := TPost{}
 
-	row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
+	//row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
+	row := db.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
 	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
 	if err != nil {
 		return TPost{}, err

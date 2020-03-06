@@ -21,10 +21,10 @@ type Server struct {
 func (server *Server) viewList(w http.ResponseWriter, r *http.Request) {
 	MyBlog, err := GetBlog(server.database, server.currBlog)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -32,10 +32,10 @@ func (server *Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(server.database, url[len(url)-1])
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -43,10 +43,10 @@ func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(server.database, url[len(url)-1])
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -58,7 +58,7 @@ func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id"))
 
 	if err != nil {
-		log.Printf("res %v, err %v", res, err)
+		log.Fatalf("res %v, err %v", res, err)
 	}
 
 	http.Redirect(w, r, "/", 303)
@@ -69,12 +69,12 @@ func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 
 	res, err := server.database.Exec("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')")
 	if err != nil {
-		log.Printf("err %v, res %v", err, res)
+		log.Fatalf("err %v, res %v", err, res)
 	}
 	row := server.database.QueryRow("select LAST_INSERT_ID() from myblog.posts")
 	err = row.Scan(&indp)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 	newp := TPost{
 		ID:       strconv.Itoa(indp),
@@ -82,7 +82,7 @@ func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 		PostTime: time.Now().Format("2006-01-02 15:04:05"),
 		Text:     ""}
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }
 
@@ -90,7 +90,7 @@ func (server *Server) delPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	res, err := server.database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
 	if err != nil {
-		log.Printf("err %v, res %v", err, res)
+		log.Fatalf("err %v, res %v", err, res)
 	}
 	http.Redirect(w, r, "/", 303)
 }
@@ -128,7 +128,6 @@ type TPost struct {
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
 var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
 var edit = template.Must(template.New("MyPost").ParseFiles("./homework-3/edit.html"))
-var database *sql.DB
 
 // MyBlog - my blog variable
 var MyBlog TBlog
@@ -150,7 +149,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//database = db
+
 	serv := Server{database: db, currBlog: "1"}
 	defer serv.database.Close()
 

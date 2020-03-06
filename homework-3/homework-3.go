@@ -105,7 +105,8 @@ func viewList(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewPost(w http.ResponseWriter, r *http.Request) {
-	dbpost, err := GetPost(r.URL.Path[len("/post/"):])
+	url := strings.Split(r.URL.Path, "/")
+	dbpost, err := GetPost(url[len(url)-1])
 	if err != nil {
 		log.Println(err)
 	}
@@ -115,7 +116,8 @@ func viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func editPost(w http.ResponseWriter, r *http.Request) {
-	dbpost, err := GetPost(r.URL.Path[len("/edit/"):])
+	url := strings.Split(r.URL.Path, "/")
+	dbpost, err := GetPost(url[len(url)-1])
 	if err != nil {
 		log.Println(err)
 	}
@@ -156,8 +158,8 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func delPost(w http.ResponseWriter, r *http.Request) {
-	//res, err := database.Exec("delete from myblog.posts where id = ?", r.URL.Path[len("/del/"):])
-	res, err := database.Exec("delete from myblog.posts where id = ?", strings.Split(r.URL.Path, "/")[2])
+	url := strings.Split(r.URL.Path, "/")
+	res, err := database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
 	if err != nil {
 		log.Printf("err %v, res %v", err, res)
 	}

@@ -13,6 +13,12 @@ import (
 	_ "github.com/go-sql-driver/MySQL"
 )
 
+// Server - server struct
+type Server struct {
+	database *sql.DB
+	currBlog int
+}
+
 // TBlog - blog struct
 type TBlog struct {
 	ID       string

@@ -65,7 +65,7 @@ func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 	var indp int
 
-	res, err := server.database.Exec("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (1,'',NOW(),'')")
+	res, err := server.database.Exec("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (?,'',NOW(),'')", server.currBlog)
 	if err != nil {
 		log.Fatalf("err %v, res %v", err, res)
 	}

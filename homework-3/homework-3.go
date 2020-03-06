@@ -166,12 +166,12 @@ func GetBlog(id string) (TBlog, error) {
 	row := database.QueryRow(fmt.Sprintf("select * from myblog.blogs where blogs.id = %v", id))
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
-		return blog, err
+		return TBlog{}, err
 	}
 
 	rows, err := database.Query(fmt.Sprintf("select * from posts where blogid = %v", id))
 	if err != nil {
-		return blog, err
+		return TBlog{}, err
 	}
 	defer rows.Close()
 
@@ -194,7 +194,7 @@ func GetPost(id string) (TPost, error) {
 	row := database.QueryRow(fmt.Sprintf("select * from myblog.posts where posts.id = %v", id))
 	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
 	if err != nil {
-		return post, err
+		return TPost{}, err
 	}
 	//log.Println(post)
 	return post, nil

@@ -21,10 +21,11 @@ type TBlog struct {
 	PostList []TPost
 }
 
-// mysql> CREATE TABLE blogs (
-//    -> id SERIAL PRIMARY KEY,
-//    -> name VARCHAR(255) NOT NULL,
-//    -> title VARCHAR(255) NOT NULL);
+/* mysql> CREATE TABLE blogs (
+   -> id SERIAL PRIMARY KEY,
+   -> name VARCHAR(255) NOT NULL,
+   -> title VARCHAR(255) NOT NULL);
+*/
 
 // TPost - post struct
 type TPost struct {
@@ -34,12 +35,13 @@ type TPost struct {
 	Text     string
 }
 
-// mysql> CREATE TABLE posts (
-//    -> id SERIAL PRIMARY KEY,
-//    -> blogid INT NOT NULL,
-//   -> subj VARCHAR(255) NOT NULL,
-//    -> posttime TIMESTAMP NOT NULL,
-//    -> posttext TEXT NOT NULL);
+/* mysql> CREATE TABLE posts (
+    -> id SERIAL PRIMARY KEY,
+    -> blogid INT NOT NULL,
+   -> subj VARCHAR(255) NOT NULL,
+    -> posttime TIMESTAMP NOT NULL,
+    -> posttext TEXT NOT NULL);
+*/
 
 var tmpl = template.Must(template.New("MyTemplate").ParseFiles("./homework-3/tmpl.html"))
 var post = template.Must(template.New("MyPost").ParseFiles("./homework-3/post.html"))
@@ -49,22 +51,13 @@ var database *sql.DB
 // MyBlog - my blog variable
 var MyBlog TBlog
 
-/*var MyBlog = TBlog{
-	Name:  "Blog",
-	Title: "My blog",
-	PostList: []TPost{
-		TPost{"0", "1st subj", "01.01.2020", "1st text"},
-		TPost{"1", "2nd subj", "02.01.2020", "2nd text"},
-		TPost{"2", "3rd subj", "03.01.2020", "3rd text"},
-	},
-}*/
-
-// mysql> INSERT INTO blogs (name, title) VALUES (
-//    -> "Blog", "My Blog");
-// mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
-//    -> 1,"1st subj",NOW()-100000,"1st text"),
-//    -> (1,"2nd subj",NOW()-10000,"2st text"),
-//    -> (1,"3rd subj",NOW(),"3rd text");
+/* mysql> INSERT INTO blogs (name, title) VALUES (
+   -> "Blog", "My Blog");
+mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
+   -> 1,"1st subj",NOW()-100000,"1st text"),
+   -> (1,"2nd subj",NOW()-10000,"2st text"),
+   -> (1,"3rd subj",NOW(),"3rd text");
+*/
 
 // DSN - MySQL Data Source Name
 var DSN = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"

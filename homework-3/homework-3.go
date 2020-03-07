@@ -21,10 +21,13 @@ type Server struct {
 func (server *Server) viewList(w http.ResponseWriter, r *http.Request) {
 	MyBlog, err := GetBlog(server.database, server.currBlog)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
+
 	if err := tmpl.ExecuteTemplate(w, "blog", MyBlog); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -32,10 +35,13 @@ func (server *Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(server.database, url[len(url)-1])
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
+
 	if err := post.ExecuteTemplate(w, "post", dbpost); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -43,10 +49,13 @@ func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	dbpost, err := GetPost(server.database, url[len(url)-1])
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
+
 	if err := edit.ExecuteTemplate(w, "edit", dbpost); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -57,7 +66,8 @@ func (server *Server) savePost(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("fsubj"), r.FormValue("fpt"), r.FormValue("body"), r.FormValue("id"))
 
 	if err != nil {
-		log.Fatalf("res %v, err %v", res, err)
+		log.Printf("res %v, err %v", res, err)
+		return
 	}
 	http.Redirect(w, r, "/", 303)
 }
@@ -67,12 +77,14 @@ func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 
 	res, err := server.database.Exec("insert into myblog.posts (blogid, subj, posttime, posttext) VALUES (?,'',NOW(),'')", server.currBlog)
 	if err != nil {
-		log.Fatalf("err %v, res %v", err, res)
+		log.Printf("err %v, res %v", err, res)
+		return
 	}
 	row := server.database.QueryRow("select LAST_INSERT_ID() from myblog.posts")
 	err = row.Scan(&indp)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	newp := TPost{
 		ID:       strconv.Itoa(indp),
@@ -80,7 +92,7 @@ func (server *Server) newPost(w http.ResponseWriter, r *http.Request) {
 		PostTime: time.Now().Format("2006-01-02 15:04:05"),
 		Text:     ""}
 	if err := edit.ExecuteTemplate(w, "edit", newp); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 
@@ -88,7 +100,7 @@ func (server *Server) delPost(w http.ResponseWriter, r *http.Request) {
 	url := strings.Split(r.URL.Path, "/")
 	res, err := server.database.Exec("delete from myblog.posts where id = ?", url[len(url)-1])
 	if err != nil {
-		log.Fatalf("err %v, res %v", err, res)
+		log.Printf("err %v, res %v", err, res)
 	}
 	http.Redirect(w, r, "/", 303)
 }
@@ -144,9 +156,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	defer db.Close()
 	serv := Server{database: db, currBlog: "1"}
-	defer serv.database.Close()
+	//defer serv.database.Close()
 
 	if err := serv.database.Ping(); err != nil {
 		log.Fatal(err)

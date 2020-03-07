@@ -18,6 +18,33 @@ type Server struct {
 	currBlog string
 }
 
+func main() {
+	DSN := "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
+	//DSN := "root:12345@tcp(172.17.0.1:3307)/myblog?charset=utf8"
+	db, err := sql.Open("mysql", DSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	serv := Server{database: db, currBlog: "1"}
+
+	if err := serv.database.Ping(); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("db pinged!")
+
+	router := http.NewServeMux()
+
+	router.HandleFunc("/", serv.viewList)
+	router.HandleFunc("/post/", serv.viewPost)
+	router.HandleFunc("/edit/", serv.editPost)
+	router.HandleFunc("/save/", serv.savePost)
+	router.HandleFunc("/new/", serv.newPost)
+	router.HandleFunc("/del/", serv.delPost)
+
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
 func (server *Server) viewList(w http.ResponseWriter, r *http.Request) {
 	MyBlog, err := GetBlog(server.database, server.currBlog)
 	if err != nil {
@@ -29,6 +56,34 @@ func (server *Server) viewList(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+}
+
+// GetBlog - get blog from database
+func GetBlog(db *sql.DB, id string) (TBlog, error) {
+	blog := TBlog{}
+
+	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
+	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
+	if err != nil {
+		return TBlog{}, err
+	}
+
+	rows, err := db.Query("select * from posts where blogid = ?", id)
+	if err != nil {
+		return TBlog{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		post := TPost{}
+		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		blog.PostList = append(blog.PostList, post)
+	}
+	return blog, nil
 }
 
 func (server *Server) viewPost(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +98,17 @@ func (server *Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+}
+
+// GetPost - get post from database
+func GetPost(db *sql.DB, id string) (TPost, error) {
+	post := TPost{}
+	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
+	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
+	if err != nil {
+		return TPost{}, err
+	}
+	return post, nil
 }
 
 func (server *Server) editPost(w http.ResponseWriter, r *http.Request) {
@@ -149,69 +215,3 @@ mysql> INSERT INTO posts (blogid, subj, posttime, posttext) VALUES (
    -> (1,"2nd subj",NOW()-10000,"2st text"),
    -> (1,"3rd subj",NOW(),"3rd text");
 */
-
-func main() {
-	DSN := "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
-	db, err := sql.Open("mysql", DSN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	serv := Server{database: db, currBlog: "1"}
-	//defer serv.database.Close()
-
-	if err := serv.database.Ping(); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("db pinged!")
-
-	router := http.NewServeMux()
-
-	router.HandleFunc("/", serv.viewList)
-	router.HandleFunc("/post/", serv.viewPost)
-	router.HandleFunc("/edit/", serv.editPost)
-	router.HandleFunc("/save/", serv.savePost)
-	router.HandleFunc("/new/", serv.newPost)
-	router.HandleFunc("/del/", serv.delPost)
-
-	log.Fatal(http.ListenAndServe(":8080", router))
-}
-
-// GetBlog - get blog from database
-func GetBlog(db *sql.DB, id string) (TBlog, error) {
-	blog := TBlog{}
-
-	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
-	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
-	if err != nil {
-		return TBlog{}, err
-	}
-
-	rows, err := db.Query("select * from posts where blogid = ?", id)
-	if err != nil {
-		return TBlog{}, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		post := TPost{}
-		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		blog.PostList = append(blog.PostList, post)
-	}
-	return blog, nil
-}
-
-// GetPost - get post from database
-func GetPost(db *sql.DB, id string) (TPost, error) {
-	post := TPost{}
-	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
-	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.Text)
-	if err != nil {
-		return TPost{}, err
-	}
-	return post, nil
-}

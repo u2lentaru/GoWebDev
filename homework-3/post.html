@@ -1,0 +1,16 @@
+{{define "post"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Subj}}</title>
+</head>
+<body>
+    <p>Viewing&nbsp{{.Subj}}</p>
+    <p>{{.PostTime}} </p>
+    <p>{{.Text}}</p>
+    <p><a href="/edit/{{.ID}}">Edit &nbsp{{.Subj}}</a></p>
+</body>
+</html>
+{{end}}
